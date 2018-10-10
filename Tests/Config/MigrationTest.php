@@ -44,6 +44,9 @@
 			$act = new MigrationAction("testField = Hey there");
 			self::assertEquals('testField', $act->field);
 
+			$act = new MigrationAction('testField = ""');
+			self::assertEquals('', $act->value);
+
 			try {
 				$act = new MigrationAction('configVersion = 5');
 				self::assertTrue(false);

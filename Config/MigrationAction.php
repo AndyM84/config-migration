@@ -70,6 +70,10 @@
 				throw new \InvalidArgumentException("Non-REMOVE action without a value");
 			}
 
+			if ($this->value == '""') {
+				$this->value = '';
+			}
+
 			return;
 		}
 	}
