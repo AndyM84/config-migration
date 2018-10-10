@@ -1,6 +1,8 @@
 # config-migration
 A simple (but effective!) system for managing different versions of configuration files and their settings.
 
+[![Build Status](https://travis-ci.com/AndyM84/config-migration.svg?branch=master)](https://travis-ci.com/AndyM84/config-migration)
+
 ## Development Setup
 There are no dependencies other than PHP (of course) to use the system, however if you'd like to use the source
 code and run the tests, feel free to clone or download the repo and run the following commands from the repository
