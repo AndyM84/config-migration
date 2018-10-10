@@ -72,7 +72,7 @@ If you run these through a migration, the system will produce the following `sit
 }
 ```
 
-### Config Migrations
+## Config Migrations
 Each config migration is a file with simple per-line instructions.  The file name is in the format `<VERSION1>-<VERSION2>.cfg`,
 which allows the system to know which version it should look to migrate from and to.  Instructions contain 2-3 segments:
 
