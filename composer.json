@@ -1,8 +1,18 @@
 {
 	"name": "AndyM84/Config",
+	"type": "library",
 	"description": "Configuration Management",
+	"keywords": ["config", "configuration", "automation"],
 	"version": "1.0.0",
-	"homepage": "https://andymale.com/",
+	"homepage": "https://github.com/AndyM84/config-migration",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Andrew Male",
+			"homepage": "https://andymale.com/",
+			"role": "Developer"
+		}
+	],
 	"autoload": {
 		"psr-0": {
 			"AndyM84\\Config\\": "./Config"
