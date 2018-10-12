@@ -13,6 +13,15 @@ composer update
 vendor/bin/phpunit -c phpunit.xml ./Tests
 ```
 
+## Installation
+As with most things, I've made this available via [Composer](https://packagist.org/packages/andym84/config), you can add `"andym84/config": "^1.0"` to your `composer.json` or you can simply execute the command:
+
+```
+composer require andym84/config
+```
+
+Alternatively, of course, you're welcome to simply download the source code and reference it manually.
+
 ## Usage
 Usage of the system requires at least two things:
 
