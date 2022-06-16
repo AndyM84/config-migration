@@ -9,3 +9,5 @@ coverage
 test.php
 *.zip
 /siteSettings.json
+.idea/
+.phpunit.result.cache

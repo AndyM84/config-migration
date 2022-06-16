@@ -3,51 +3,48 @@
 	namespace AndyM84\Config;
 
 	/**
-	 * Class that repsents a single action from
-	 * an instruction file.
+	 * Class that represents a single action from an instruction file.
 	 *
-	 * @version 1.0
+	 * @version 1.1
 	 * @author Andrew Male (AndyM84)
 	 * @package AndyM84\Config
 	 */
 	class MigrationAction {
 		/**
-		 * The name of the field the action will
-		 * be performed upon.
+		 * The name of the field the action will be performed upon.
 		 *
 		 * @var string
 		 */
-		public $field;
+		public string $field;
 		/**
-		 * The operator representing the operation
-		 * which will be performed.
+		 * The operator representing the operation which will be performed.
 		 *
 		 * @var MigrationOperators
 		 */
-		public $operator;
+		public MigrationOperators $operator;
 		/**
 		 * The type of the field, if provided.
 		 *
 		 * @var FieldTypes
 		 */
-		public $type;
+		public FieldTypes $type;
 		/**
 		 * The value of the field, if provided.
 		 *
 		 * @var mixed
 		 */
-		public $value;
+		public mixed $value;
 
 
 		/**
-		 * Instantiates a new MigrationAction object, parsing
-		 * the provided instruction line into its pieces.
+		 * Instantiates a new MigrationAction object, parsing the provided instruction line into its pieces.
 		 *
 		 * @param string $string String value of line from instruction file.
-		 * @throws \InvalidArgumentException Thrown if field is the reserved 'configVersion' field or if a non-REMOVE action is missing its value.
+		 * @throws \InvalidArgumentException
 		 */
-		public function __construct($string) {
-			$field = substr($string, 0, stripos($string, ' '));
+		public function __construct(string $string) {
+			$this->value = null;
+			$field       = substr($string, 0, stripos($string, ' '));
 			
 			if (stripos($field, '[') !== false) {
 				$this->field = substr($field, 0, stripos($field, '['));

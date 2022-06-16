@@ -119,6 +119,10 @@
 			self::assertTrue($cfg->has('test7'));
 			self::assertEquals(3.14, $cfg->get('test7'));
 
+			$cfg->set('test8', 'false', FieldTypes::BOOLEAN);
+			self::assertTrue($cfg->has('test8'));
+			self::assertFalse($cfg->get('test8'));
+
 			try {
 				$cfg->remove('test3');
 				self::assertTrue(false);
@@ -134,7 +138,7 @@
 			}
 
 			try {
-				$cfg->set('test8', 'test', -1);
+				$cfg->set('test9', 'test', -1);
 				self::assertTrue(false);
 			} catch (\InvalidArgumentException $ex) {
 				self::assertEquals("Invalid type given for new setting", $ex->getMessage());

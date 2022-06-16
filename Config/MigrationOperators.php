@@ -3,10 +3,9 @@
 	namespace AndyM84\Config;
 
 	/**
-	 * Enumerated operators available
-	 * for use in instructions.
+	 * Enumerated operators available for use in instructions.
 	 *
-	 * @version 1.0
+	 * @version 1.1
 	 * @author Andrew Male (AndyM84)
 	 * @package AndyM84\Config
 	 */
@@ -22,19 +21,19 @@
 		 *
 		 * @var string
 		 */
-		protected $name = 'err';
+		protected string $name = 'err';
 		/**
 		 * Value set for object.
 		 *
-		 * @var integer
+		 * @var int
 		 */
-		protected $value = self::ERROR;
+		protected int $value = self::ERROR;
 		/**
 		 * Static lookup for names to values.
 		 *
 		 * @var array
 		 */
-		protected static $lookup = array(
+		protected static array $lookup = array(
 			'+' => self::ADD,
 			'=' => self::CHANGE,
 			'-' => self::REMOVE,
@@ -43,14 +42,13 @@
 
 
 		/**
-		 * Static method to generate a new MigrationOperator
-		 * object from its string representation.
+		 * Static method to generate a new MigrationOperator object from its string representation.
 		 *
 		 * @param string $string String representation of an operator value.
 		 * @return MigrationOperators
 		 */
-		public static function fromString($string) {
-			$string = \mb_strtolower($string);
+		public static function fromString(string $string) : MigrationOperators {
+			$string = strtolower($string);
 
 			foreach (static::$lookup as $str => $val) {
 				if ($string === $str) {
@@ -62,27 +60,23 @@
 		}
 
 		/**
-		 * Static method to determine if a given name is a
-		 * valid string representation of a value.
+		 * Static method to determine if a given name is a valid string representation of a value.
 		 *
 		 * @param string $name String representation of an operator value.
-		 * @return boolean
+		 * @return bool
 		 */
-		public static function validName($name) {
-			$name = \mb_strtolower($name);
-
-			return array_key_exists($name, static::$lookup);
+		public static function validName(string $name) : bool {
+			return array_key_exists(strtolower($name), static::$lookup);
 		}
 
 		/**
-		 * Static method to determine if a given integer
-		 * is a valid operator value.
+		 * Static method to determine if a given integer is a valid operator value.
 		 *
-		 * @param integer $value Integer value to check as an operator value.
-		 * @return boolean
+		 * @param int $value Integer value to check as an operator value.
+		 * @return bool
 		 */
-		public static function validValue($value) {
-			foreach (array_values(static::$lookup) as $validValue) {
+		public static function validValue(int $value) : bool {
+			foreach (static::$lookup as $validValue) {
 				if ($validValue === $value) {
 					return true;
 				}
@@ -95,9 +89,9 @@
 		/**
 		 * Instantiates a new MigrationOperators object.
 		 *
-		 * @param integer $value Integer value for the operator.
+		 * @param ?int $value Integer value for the operator.
 		 */
-		public function __construct($value) {
+		public function __construct(?int $value) {
 			if ($value !== null) {
 				foreach (static::$lookup as $name => $val) {
 					if ($value === $val) {
@@ -113,23 +107,21 @@
 		}
 
 		/**
-		 * Converts a MigrationOperators object into the
-		 * name of the operator.
+		 * Converts a MigrationOperators object into the name of the operator.
 		 *
 		 * @return string
 		 */
-		public function __toString() {
+		public function __toString() : string {
 			return $this->name;
 		}
 
 		/**
-		 * Checks if the operator has the same value
-		 * as the provided integer.
+		 * Checks if the operator has the same value as the provided integer.
 		 *
-		 * @param integer $value Integer to compare operator value against.
-		 * @return boolean
+		 * @param int $value Integer to compare operator value against.
+		 * @return bool
 		 */
-		public function is($value) {
+		public function is(int $value) : bool {
 			if ($this->value === $value) {
 				return true;
 			}
@@ -138,12 +130,11 @@
 		}
 
 		/**
-		 * Serializes the MigrationOperators object, returning
-		 * the name string.
+		 * Serializes the MigrationOperators object, returning the name string.
 		 *
 		 * @return string
 		 */
-		public function jsonSerialize() {
+		public function jsonSerialize() : string {
 			return $this->name;
 		}
 
@@ -152,16 +143,16 @@
 		 *
 		 * @return string
 		 */
-		public function getName() {
+		public function getName() : string {
 			return $this->name;
 		}
 
 		/**
 		 * Retrieves the value of the object.
 		 *
-		 * @return integer
+		 * @return int
 		 */
-		public function getValue() {
+		public function getValue() : int {
 			return $this->value;
 		}
 	}

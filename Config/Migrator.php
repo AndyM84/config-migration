@@ -3,63 +3,57 @@
 	namespace AndyM84\Config;
 
 	/**
-	 * Class that performs migration of a
-	 * configuration file between versions.
+	 * Class that performs migration of a configuration file between versions.
 	 *
-	 * @version 1.0
+	 * @version 1.1
 	 * @author Andrew Male (AndyM84)
 	 * @package AndyM84\Config
 	 */
 	class Migrator {
 		/**
-		 * Collection of migration files containing
-		 * instructions.
+		 * Collection of migration files containing instructions.
 		 *
 		 * @var MigrationFile[]
 		 */
-		protected $files = array();
+		protected array $files = [];
 		/**
-		 * Path to the directory containing migration
-		 * instruction files.
+		 * Path to the directory containing migration instruction files.
 		 *
-		 * @var string
+		 * @var ?string
 		 */
-		protected $migrationDirectory = null;
+		protected ?string $migrationDirectory = null;
 		/**
-		 * Extension to use for migration instruction
-		 * files.
+		 * Extension to use for migration instruction files.
 		 *
 		 * Defaults to '.cfg'.
 		 *
-		 * @var string
+		 * @var ?string
 		 */
-		protected $migrationExtension = null;
+		protected ?string $migrationExtension = null;
 		/**
-		 * Path to the settings file which will have
-		 * the migration instructions applies to it.
+		 * Path to the settings file which will have the migration instructions applies to it.
 		 *
-		 * @var string
+		 * @var ?string
 		 */
-		protected $settingsFile = null;
+		protected ?string $settingsFile = null;
 
 
 		/**
-		 * Instantiates a new Migrator, attempting to load all
-		 * instruction files in preparation for migration.
+		 * Instantiates a new Migrator, attempting to load all instruction files in preparation for migration.
 		 *
 		 * @param string $migrationDirectory The directory path where the instruction files exist.
 		 * @param string $settingsFile The name of the settings file to read/generate, defaults to 'siteSettings.json'.
 		 * @param string $migrationExtension The file extension used by the instruction files, defaults to '.cfg'.
-		 * @throws \InvalidArgumentException Thrown if the migration directory doesn''t exist or the extension is empty/null.
+		 * @throws \InvalidArgumentException
 		 */
-		public function __construct($migrationDirectory, $settingsFile = 'siteSettings.json', $migrationExtension = '.cfg') {
+		public function __construct(string $migrationDirectory, string $settingsFile = 'siteSettings.json', string $migrationExtension = '.cfg') {
 			$migrationDirectory = str_replace("\\", "/", $migrationDirectory);
 
 			if (!is_dir($migrationDirectory)) {
 				throw new \InvalidArgumentException("Invalid migration directory");
 			}
 
-			if (substr($migrationDirectory, -1) !== '/') {
+			if (!str_ends_with($migrationDirectory, '/')) {
 				$migrationDirectory .= "/";
 			}
 
@@ -72,7 +66,7 @@
 			$this->settingsFile = $settingsFile;
 			$this->migrationExtension = $migrationExtension;
 
-			foreach (array_values(glob("{$this->migrationDirectory}*{$this->migrationExtension}")) as $file) {
+			foreach (glob("{$this->migrationDirectory}*{$this->migrationExtension}") as $file) {
 				$fh = @fopen($file, 'r');
 
 				if ($fh) {
@@ -104,12 +98,11 @@
 		}
 
 		/**
-		 * Perform migration of settings file using the loaded
-		 * instruction files.
+		 * Perform migration of settings file using the loaded instruction files.
 		 *
 		 * @return void
 		 */
-		public function migrate() {
+		public function migrate() : void {
 			$currentSettings = new ConfigContainer();
 
 			if (file_exists($this->settingsFile)) {
@@ -123,14 +116,14 @@
 			$filesToApply = array();
 			$currentVersion = $currentSettings->get('configVersion');
 
-			foreach (array_values($this->files) as $file) {
+			foreach ($this->files as $file) {
 				if ($file->origVersion >= $currentVersion) {
 					$filesToApply[] = $file;
 				}
 			}
 
-			foreach (array_values($filesToApply) as $file) {
-				foreach (array_values($file->actions) as $action) {
+			foreach ($filesToApply as $file) {
+				foreach ($file->actions as $action) {
 					switch ($action->operator->getValue()) {
 						case MigrationOperators::ADD:
 							if (!$currentSettings->has($action->field)) {
@@ -150,9 +143,11 @@
 							$currentSettings->rename($action->field, $action->value);
 
 							break;
+					// @codeCoverageIgnoreStart
 						default:
 
 							break;
+					// @codeCoverageIgnoreEnd
 					}
 				}
 

@@ -3,28 +3,25 @@
 	namespace AndyM84\Config;
 
 	/**
-	 * Class that provides basic operations on
-	 * configuration settings.
+	 * Class that provides basic operations on configuration settings.
 	 *
-	 * @version 1.0
+	 * @version 1.1
 	 * @author Andrew Male (AndyM84)
 	 * @package AndyM84\Config
 	 */
 	class ConfigContainer implements \JsonSerializable {
 		/**
-		 * Collection of configuration settings and their
-		 * field types.
+		 * Collection of configuration settings and their field types.
 		 *
 		 * @var array
 		 */
-		protected $schema = array();
+		protected array $schema = [];
 		/**
-		 * Collection of configuration settings and their
-		 * values.
+		 * Collection of configuration settings and their values.
 		 *
 		 * @var array
 		 */
-		protected $settings = array();
+		protected array $settings = [];
 
 
 		/**
@@ -32,7 +29,7 @@
 		 *
 		 * @param string $jsonString Optional JSON string to attempt pulling settings from.
 		 */
-		public function __construct($jsonString = null) {
+		public function __construct(string $jsonString = null) {
 			$data = null;
 
 			if ($jsonString !== null) {
@@ -66,7 +63,7 @@
 		 * @param mixed $defaultValue Optional default value to use if setting not present.
 		 * @return mixed
 		 */
-		public function get($field, $defaultValue = null) {
+		public function get(string $field, mixed $defaultValue = null) : mixed {
 			if ($this->has($field)) {
 				return $this->settings[$field];
 			}
@@ -79,7 +76,7 @@
 		 *
 		 * @return array
 		 */
-		public function getSchema() {
+		public function getSchema() : array {
 			return $this->schema;
 		}
 
@@ -88,18 +85,17 @@
 		 *
 		 * @return array
 		 */
-		public function getSettings() {
+		public function getSettings() : array {
 			return $this->settings;
 		}
 
 		/**
-		 * Retrieves the type of a specific setting, if
-		 * possible.
+		 * Retrieves the type of specific setting, if possible.
 		 *
 		 * @param string $field String value of field name.
 		 * @return FieldTypes
 		 */
-		public function getType($field) {
+		public function getType(string $field) : FieldTypes {
 			if ($this->has($field)) {
 				return $this->schema[$field];
 			}
@@ -108,34 +104,35 @@
 		}
 
 		/**
-		 * Determines whether or not the setting
-		 * exists within the configuration.
+		 * Determines whether the setting exists within the configuration.
 		 *
 		 * @param string $field String value of field name.
-		 * @return boolean
+		 * @return bool
 		 */
-		public function has($field) {
+		public function has(string $field) : bool {
 			return array_key_exists($field, $this->schema) !== false && array_key_exists($field, $this->settings) !== false;
 		}
 
 		/**
-		 * Converts the configuration object into
-		 * a JSON serializable array.
+		 * Converts the configuration object into a JSON serializable array.
 		 *
 		 * @return array
 		 */
-		public function jsonSerialize() {
-			return array('schema' => $this->schema, 'settings' => $this->settings);
+		public function jsonSerialize() : array {
+			return [
+				'schema'   => $this->schema,
+				'settings' => $this->settings
+			];
 		}
 
 		/**
 		 * Attempts to remove a setting from the configuration.
 		 *
 		 * @param string $field String value of the field name.
-		 * @throws \InvalidArgumentException Thrown if a non-existent field is provided.
+		 * @throws \InvalidArgumentException
 		 * @return void
 		 */
-		public function remove($field) {
+		public function remove(string $field) : void {
 			if (!$this->has($field)) {
 				throw new \InvalidArgumentException("Cannot remove a field that doesn't exist");
 			}
@@ -151,10 +148,10 @@
 		 *
 		 * @param string $oldField Current string value of the field name.
 		 * @param string $newField New string value of the field name.
-		 * @throws \InvalidArgumentException Thrown if a non-existent old field is provided.
+		 * @throws \InvalidArgumentException
 		 * @return void
 		 */
-		public function rename($oldField, $newField) {
+		public function rename(string $oldField, string $newField) : void {
 			if (!$this->has($oldField)) {
 				throw new \InvalidArgumentException("Cannot rename a field that doesn't exist");
 			}
@@ -172,11 +169,11 @@
 		 *
 		 * @param string $field String value of the field name.
 		 * @param mixed $value Value to set field to in configuration.
-		 * @param integer $type Integer value of field type, only used if field doesn't' already exist.
-		 * @throws \InvalidArgumentException Thrown if provided with an invalid type.
+		 * @param ?int $type Integer value of field type, only used if field doesn't already exist.
+		 * @throws \InvalidArgumentException
 		 * @return void
 		 */
-		public function set($field, $value, $type = null) {
+		public function set(string $field, mixed $value, ?int $type = null) : void {
 			if (stripos($value, '${') !== false) {
 				$replacements = array();
 
@@ -199,7 +196,13 @@
 
 			switch ($this->schema[$field]->getValue()) {
 				case FieldTypes::BOOLEAN:
-					$this->settings[$field] = boolval($value);
+					$lValue = strtolower($value);
+
+					if ($lValue == 'true' || $lValue == 'false') {
+						$this->settings[$field] = $lValue == 'true';
+					} else {
+						$this->settings[$field] = boolval($value);
+					}
 
 					break;
 				case FieldTypes::FLOAT:

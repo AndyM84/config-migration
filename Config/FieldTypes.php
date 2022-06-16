@@ -3,10 +3,9 @@
 	namespace AndyM84\Config;
 
 	/**
-	 * Enumerated types available for use in
-	 * configuration.
+	 * Enumerated types available for use in configuration.
 	 *
-	 * @version 1.0
+	 * @version 1.1
 	 * @author Andrew Male (AndyM84)
 	 * @package AndyM84\Config
 	 */
@@ -22,35 +21,34 @@
 		 *
 		 * @var string
 		 */
-		protected $name = 'err';
+		protected string $name = 'err';
 		/**
 		 * Value set for object.
 		 *
-		 * @var integer
+		 * @var int
 		 */
-		protected $value = self::ERROR;
+		protected int $value = self::ERROR;
 		/**
 		 * Static lookup for names to values.
 		 *
 		 * @var array
 		 */
-		protected static $lookup = array(
+		protected static array $lookup = [
 			'bln' => self::BOOLEAN,
 			'flt' => self::FLOAT,
 			'int' => self::INTEGER,
 			'str' => self::STRING
-		);
+		];
 
 
 		/**
-		 * Static method to generate a new FieldTypes
-		 * object from its string representation.
+		 * Static method to generate a new FieldTypes object from its string representation.
 		 *
 		 * @param string $string String representation of a field type.
 		 * @return FieldTypes
 		 */
-		public static function fromString($string) {
-			$string = \mb_strtolower($string);
+		public static function fromString(string $string) : FieldTypes {
+			$string = strtolower($string);
 
 			foreach (static::$lookup as $str => $val) {
 				if ($string === $str) {
@@ -62,27 +60,23 @@
 		}
 
 		/**
-		 * Static method to determine if a given name is a
-		 * valid string representation of a value.
+		 * Static method to determine if a given name is a valid string representation of a value.
 		 *
 		 * @param string $name String representation of a value.
-		 * @return boolean
+		 * @return bool
 		 */
-		public static function validName($name) {
-			$name = \mb_strtolower($name);
-
-			return array_key_exists($name, static::$lookup);
+		public static function validName(string $name) : bool {
+			return array_key_exists(strtolower($name), static::$lookup);
 		}
 
 		/**
-		 * Static method to determine if a given integer
-		 * is a valid field type.
+		 * Static method to determine if a given integer is a valid field type.
 		 *
-		 * @param integer $value Integer value to check as a field type.
-		 * @return boolean
+		 * @param int $value Integer value to check as a field type.
+		 * @return bool
 		 */
-		public static function validValue($value) {
-			foreach (array_values(static::$lookup) as $validValue) {
+		public static function validValue(int $value) : bool {
+			foreach (static::$lookup as $validValue) {
 				if ($validValue === $value) {
 					return true;
 				}
@@ -95,10 +89,9 @@
 		/**
 		 * Instantiates a new FieldTypes object.
 		 *
-		 * @param integer $value Integer value for the field type.
-		 * @return void
+		 * @param ?int $value Integer value for the field type.
 		 */
-		public function __construct($value) {
+		public function __construct(?int $value) {
 			if ($value !== null) {
 				foreach (static::$lookup as $name => $val) {
 					if ($value === $val) {
@@ -114,23 +107,21 @@
 		}
 
 		/**
-		 * Converts a FieldTypes object into the name
-		 * of the field type.
+		 * Converts a FieldTypes object into the name of the field type.
 		 *
 		 * @return string
 		 */
-		public function __toString() {
+		public function __toString() : string {
 			return $this->name;
 		}
 
 		/**
-		 * Checks if the field type has the same value
-		 * as the provided integer.
+		 * Checks if the field type has the same value as the provided integer.
 		 *
-		 * @param integer $value Integer to compare against field type.
-		 * @return boolean
+		 * @param int $value Integer to compare against field type.
+		 * @return bool
 		 */
-		public function is($value) {
+		public function is(int $value) : bool {
 			if ($this->value === $value) {
 				return true;
 			}
@@ -139,12 +130,11 @@
 		}
 
 		/**
-		 * Serializes the FieldTypes object, returning
-		 * the name string.
+		 * Serializes the FieldTypes object, returning the name string.
 		 *
 		 * @return string
 		 */
-		public function jsonSerialize() {
+		public function jsonSerialize() : string {
 			return $this->name;
 		}
 
@@ -153,16 +143,16 @@
 		 *
 		 * @return string
 		 */
-		public function getName() {
+		public function getName() : string {
 			return $this->name;
 		}
 
 		/**
 		 * Retrieves the value of the object.
 		 *
-		 * @return integer
+		 * @return int
 		 */
-		public function getValue() {
+		public function getValue() : int {
 			return $this->value;
 		}
 	}

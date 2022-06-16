@@ -3,39 +3,37 @@
 	namespace AndyM84\Config;
 
 	/**
-	 * Class that represents a file with
-	 * migration instructions.
+	 * Class that represents a file with migration instructions.
 	 *
-	 * @version 1.0
+	 * @version 1.1
 	 * @author Andrew Male (AndyM84)
 	 * @package AndyM84\Config
 	 */
 	class MigrationFile {
 		/**
-		 * Collection of actions from within
-		 * instruction file.
+		 * Collection of actions from within instruction file.
 		 *
 		 * @var MigrationAction[]
 		 */
-		public $actions = array();
+		public array $actions = [];
 		/**
 		 * Destination version for this instruction file.
 		 *
-		 * @var integer
+		 * @var ?int
 		 */
-		public $destVersion = null;
+		public ?int $destVersion = null;
 		/**
 		 * Stripped file name for this instruction file.
 		 *
-		 * @var string
+		 * @var ?string
 		 */
-		public $fileName = null;
+		public ?string $fileName = null;
 		/**
 		 * Original version for this instruction file.
 		 *
-		 * @var integer
+		 * @var ?int
 		 */
-		public $origVersion = null;
+		public ?int $origVersion = null;
 
 
 		/**
@@ -46,7 +44,7 @@
 		 * @param string $extension Optional file extension, defaults to '.cfg'.
 		 * @throws \InvalidArgumentException Thrown if the file name has an incorrect format or the version numbers in the file name are not numbers.
 		 */
-		public function __construct($fileName, array $lines, $extension = '.cfg') {
+		public function __construct(string $fileName, array $lines, string $extension = '.cfg') {
 			if (stripos($fileName, '/') !== false) {
 				$this->fileName = substr($fileName, strripos($fileName, '/') + 1);
 			} else if (stripos($fileName, '\\') !== false) {
@@ -68,7 +66,7 @@
 			$this->origVersion = intval($nameParts[0]);
 			$this->destVersion = intval($nameParts[1]);
 
-			foreach (array_values($lines) as $line) {
+			foreach ($lines as $line) {
 				$this->actions[] = new MigrationAction($line);
 			}
 
