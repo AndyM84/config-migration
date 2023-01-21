@@ -118,7 +118,7 @@
 		 *
 		 * @return array
 		 */
-		public function jsonSerialize() : array {
+		public function jsonSerialize() : mixed {
 			return [
 				'schema'   => $this->schema,
 				'settings' => $this->settings

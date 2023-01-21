@@ -134,7 +134,7 @@
 		 *
 		 * @return string
 		 */
-		public function jsonSerialize() : string {
+		public function jsonSerialize() : mixed {
 			return $this->name;
 		}
 
