@@ -48,7 +48,12 @@
 			
 			if (stripos($field, '[') !== false) {
 				$this->field = substr($field, 0, stripos($field, '['));
-				$this->type = FieldTypes::fromString(substr($field, stripos($field, '[') + 1, 3));
+
+				if (stripos($field, '[]') !== false) {
+					$this->type = FieldTypes::fromString(substr($field, stripos($field, '[') + 1, 5));
+				} else {
+					$this->type = FieldTypes::fromString(substr($field, stripos($field, '[') + 1, 3));
+				}
 			} else {
 				$this->field = $field;
 			}

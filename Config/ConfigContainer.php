@@ -3,9 +3,40 @@
 	namespace AndyM84\Config;
 
 	/**
+	 * Class that represents a single settings node with children.
+	 *
+	 * @version 1.3
+	 * @author Andrew Male (AndyM84)
+	 * @package AndyM84\Config
+	 */
+	class SettingsNodeGroup {
+		public array $keys = [];
+		public int $numChildren;
+
+
+		/**
+		 * Instantiates a new SettingNodeGroup object.
+		 *
+		 * @param string $key String key for the setting node group.
+		 * @param int $index Current index for children traversal.
+		 * @param array $children The children for the setting node.
+		 */
+		public function __construct(
+			public string $key,
+			public int $index,
+			public array $children
+		) {
+			$this->keys        = array_keys($this->children);
+			$this->numChildren = count($this->children);
+
+			return;
+		}
+	}
+
+	/**
 	 * Class that provides basic operations on configuration settings.
 	 *
-	 * @version 1.1
+	 * @version 1.3
 	 * @author Andrew Male (AndyM84)
 	 * @package AndyM84\Config
 	 */
@@ -40,17 +71,35 @@
 				return;
 			}
 
-			if (count($data['schema']) !== count($data['settings'])) {
-				return;
-			}
+			foreach ($data['settings'] as $field => $value) {
+				if (!is_array($value)) {
+					if (array_key_exists($field, $data['schema']) === false) {
+						continue;
+					}
 
-			foreach ($data['schema'] as $field => $type) {
-				if (array_key_exists($field, $data['settings']) === false) {
+					$this->schema[$field]   = FieldTypes::fromString($data['schema'][$field]);
+					$this->settings[$field] = $value;
+
 					continue;
 				}
 
-				$this->schema[$field] = FieldTypes::fromString($type);
-				$this->settings[$field] = $data['settings'][$field];
+				if (array_key_exists($field, $data['schema']) !== false) {
+					$type = FieldTypes::fromString($data['schema'][$field]);
+
+					if ($type->isArrayType()) {
+						$this->schema[$field]   = $type;
+						$this->settings[$field] = $value;
+					}
+				}
+
+				$keyParts  = explode('.', $field);
+				$node      = new SettingsNodeGroup($keyParts[0], 0, $data['settings'][$keyParts[0]]);
+				$nodePairs = $this->readNode($node, $data['schema']);
+
+				foreach ($nodePairs as $key => $val) {
+					$this->schema[$key]   = FieldTypes::fromString($data['schema'][$key]);
+					$this->settings[$key] = $val;
+				}
 			}
 
 			return;
@@ -119,10 +168,109 @@
 		 * @return array
 		 */
 		public function jsonSerialize() : mixed {
+			$settings = [];
+
+			foreach ($this->settings as $key => $val) {
+				if (stripos($key, '.') === false) {
+					$settings[$key] = $val;
+
+					continue;
+				}
+
+				$tmp			= &$settings;
+				$keyParts = explode('.', $key);
+				$numParts = count($keyParts);
+
+				for ($i = 0; $i < $numParts; $i++) {
+					$currPart = $keyParts[$i];
+
+					if (array_key_exists($currPart, $tmp) === false) {
+						$tmp[$currPart] = [];
+					}
+
+					if ($i === $numParts - 1) {
+						$tmp[$currPart] = $val;
+
+						break;
+					}
+
+					if (array_key_exists($currPart, $tmp) === false) {
+						$tmp[$currPart] = [];
+					}
+
+					$tmp = &$tmp[$currPart];
+				}
+			}
+
 			return [
 				'schema'   => $this->schema,
-				'settings' => $this->settings
+				'settings' => $settings,
 			];
+		}
+
+		/**
+		 * Reads a node from the settings and produces a flattened array of values that are validated against the schema.
+		 * For example:
+		 *
+		 * {
+		 *   'key1': 'value1',
+		 *   'key2': {
+		 *     'key3': 'value3'
+		 *   },
+		 *   'key4': {
+		 *     'key5': {
+		 *       'key6': 'value6'
+		 *     }
+		 *   }
+		 * }
+		 *
+		 * Would produce:
+		 *
+		 * [
+		 *   'key1' => 'value1',
+		 *   'key2.key3' => 'value3',
+		 *   'key4.key5.key6' => 'value6'
+		 * ]
+		 *
+		 * @param SettingsNodeGroup $node The node to read.
+		 * @param array $schema The schema to use for reading.
+		 * @return array
+		 */
+		protected function readNode(SettingsNodeGroup $node, array $schema) : array {
+			$ret        = [];
+			$currNode   = $node;
+			$nodeGroups = new \SplStack();
+
+			do {
+				while ($currNode->index < $currNode->numChildren) {
+					$innerKey = $currNode->keys[$currNode->index++];
+					$innerVal = $currNode->children[$innerKey];
+					$dotKey   = "{$currNode->key}.{$innerKey}";
+
+					if (array_key_exists($dotKey, $schema) !== false) {
+						$ret[$dotKey] = $innerVal;
+
+						continue;
+					}
+
+					if (!is_array($innerVal)) {
+						continue;
+					}
+
+					$nodeGroups->push($currNode);
+					$currNode = new SettingsNodeGroup($dotKey, 0, $innerVal);
+
+					continue;
+				}
+
+				if ($nodeGroups->isEmpty()) {
+					break;
+				}
+
+				$currNode = $nodeGroups->pop();
+			} while ($currNode !== null);
+
+			return $ret;
 		}
 
 		/**
@@ -174,10 +322,14 @@
 		 * @return void
 		 */
 		public function set(string $field, mixed $value, ?int $type = null) : void {
-			if (stripos($value, '${') !== false) {
-				$replacements = array();
+			if (is_string($value) && stripos($value, '${') !== false) {
+				$replacements = [];
 
 				foreach ($this->settings as $key => $val) {
+					if ($this->schema[$key]->isArrayType()) {
+						continue;
+					}
+
 					$replacements["\${{$key}}"] = $val;
 				}
 
@@ -215,6 +367,38 @@
 					break;
 				case FieldTypes::STRING:
 					$this->settings[$field] = "{$value}";
+
+					break;
+				case FieldTypes::BOOLEAN_ARR:
+					if (!is_array($value)) {
+						$this->settings[$field] = [boolval($value)];
+					} else {
+						$this->settings[$field] = array_map(function ($val) { return boolval($val); }, $value);
+					}
+
+					break;
+				case FieldTypes::FLOAT_ARR:
+					if (!is_array($value)) {
+						$this->settings[$field] = [floatval($value)];
+					} else {
+						$this->settings[$field] = array_map(function ($val) { return floatval($val); }, $value);
+					}
+
+					break;
+				case FieldTypes::INTEGER_ARR:
+					if (!is_array($value)) {
+						$this->settings[$field] = [intval($value)];
+					} else {
+						$this->settings[$field] = array_map(function ($val) { return intval($val); }, $value);
+					}
+
+					break;
+				case FieldTypes::STRING_ARR:
+					if (!is_array($value)) {
+						$this->settings[$field] = ["{$value}"];
+					} else {
+						$this->settings[$field] = array_map(function ($val) { return "{$val}"; }, $value);
+					}
 
 					break;
 				// @codeCoverageIgnoreStart

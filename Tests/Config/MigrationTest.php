@@ -47,6 +47,11 @@
 			$act = new MigrationAction('testField = ""');
 			self::assertEquals('', $act->value);
 
+			$act = new MigrationAction("arrField[int[]] + 5");
+			self::assertEquals(5, $act->value);
+			self::assertTrue($act->type->is(FieldTypes::INTEGER_ARR));
+			self::assertTrue($act->type->isArrayType());
+
 			try {
 				$act = new MigrationAction('configVersion = 5');
 				self::assertTrue(false);
@@ -61,13 +66,13 @@
 		}
 
 		public function test_Files() {
-			$lines = array(
+			$lines = [
 				'testField[str] + Value!',
 				'testField > testingFields',
 				'intField[int] + 5',
 				'tempField[str] + Testing',
 				'tempField -'
-			);
+			];
 
 			$file = new MigrationFile('test/files/location/0-1.cfg', $lines);
 			self::assertEquals('0-1.cfg', $file->fileName);
@@ -92,7 +97,7 @@
 			$firstMigration = 'coreVersion[int] + 1';
 			$secondMigration = "testField[str] + Test Value!\ntempField[int] + 1";
 			$thirdMigration = "anotherField[bln] + false";
-			$fourthMigration = "testField > testingField\ncoreVersion = 2\ntempField -";
+			$fourthMigration = "testField > testingField\ncoreVersion = 2\ntempField -\narrField[int[]] + 5\narrField[int[]] + 6\nnested.field[int] + 1\nnested.nested.field[str] + yeah buddy";
 
 			try {
 				$migrator = new Migrator('doesntExist');
@@ -135,6 +140,12 @@
 
 			$cfg = new ConfigContainer(file_get_contents('siteSettings.json'));
 			self::assertEquals(3, $cfg->get('configVersion'));
+			self::assertEquals(2, $cfg->get('coreVersion'));
+			self::assertEquals('Test Value!', $cfg->get('testingField'));
+			self::assertCount(2, $cfg->get('arrField', []));
+			self::assertEquals(5, $cfg->get('arrField')[0]);
+			self::assertEquals(1, $cfg->get('nested.field'));
+			self::assertEquals('yeah buddy', $cfg->get('nested.nested.field'));
 
 			foreach (glob('doesntExist/*.cfg') as $file) {
 				unlink($file);

@@ -86,12 +86,12 @@
 
 			if (count($this->files) > 0) {
 				usort($this->files, function ($a, $b) {
-															if ($a->origVersion == $b->origVersion) {
-																return 0;
-															}
+					if ($a->origVersion == $b->origVersion) {
+						return 0;
+					}
 
-															return ($a->origVersion < $b->origVersion) ? -1 :  1;
-														});
+					return ($a->origVersion < $b->origVersion) ? -1 :  1;
+				});
 			}
 
 			return;
@@ -126,12 +126,27 @@
 				foreach ($file->actions as $action) {
 					switch ($action->operator->getValue()) {
 						case MigrationOperators::ADD:
+							if ($action->type->isArrayType()) {
+								if ($currentSettings->has($action->field)) {
+									$tmp = $currentSettings->get($action->field);
+									$currentSettings->set($action->field, array_merge($tmp, [$action->value]), $action->type->getValue());
+								} else {
+									$currentSettings->set($action->field, $action->value, $action->type->getValue());
+								}
+
+								break;
+							}
+
 							if (!$currentSettings->has($action->field)) {
 								$currentSettings->set($action->field, $action->value, $action->type->getValue());
 							}
 
 							break;
 						case MigrationOperators::CHANGE:
+							if ($currentSettings->getType($action->field)->isArrayType()) {
+								break;
+							}
+
 							$currentSettings->set($action->field, $action->value);
 
 							break;

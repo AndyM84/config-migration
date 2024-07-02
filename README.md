@@ -59,7 +59,10 @@ siteTitle[str] + Default Title
 ```
 siteTitle > frontTitle
 backTitle[str] + Default Backend Title
-smtpHost[str] + localhost
+smtp.host[str] + localhost
+smtp.port[int] + 25
+corsOrigins[str[]] + http://localhost
+corsOrigins[str[]] + https://mydomain.com
 ```
 
 If you run these through a migration, the system will produce the following `siteSettings.json` file:
@@ -71,14 +74,23 @@ If you run these through a migration, the system will produce the following `sit
         "siteVersion": "str",
         "frontTitle": "str",
         "backTitle": "str",
-        "smtpHost": "str"
+        "smtp.host": "str",
+        "smtp.port": "int",
+        "corsOrigins": "str[]"
     },
     "settings": {
         "configVersion": 2,
         "siteVersion": "1.0.0",
         "frontTitle": "Default Title",
         "backTitle": "Default Backend Title",
-        "smtpHost": "localhost"
+        "smtp": {
+          "host": "localhost",
+          "port": 25
+        },
+        "corsOrigins": [
+          "http://localhost",
+          "https://mydomain.com"
+        ]
     }
 }
 ```
@@ -108,7 +120,13 @@ int Integer
 flt Float
 str String
 bln Boolean
+int[] Array of Integers
+flt[] Array of Floats
+str[] Array of Strings
+bln[] Array of Booleans
 ```
+
+The array types can be added, renamed, or removed from migration files, but cannot be changed.
 
 Finally, when used, the `value` segment can contain any character (excluding the newline), as well as these special
 values:

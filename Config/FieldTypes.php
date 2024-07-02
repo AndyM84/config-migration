@@ -10,11 +10,16 @@
 	 * @package AndyM84\Config
 	 */
 	class FieldTypes implements \JsonSerializable {
-		const ERROR = 0;
-		const BOOLEAN = 1;
-		const FLOAT = 2;
-		const INTEGER = 3;
-		const STRING = 4;
+		const int ERROR = 0;
+		const int BOOLEAN = 1;
+		const int FLOAT = 2;
+		const int INTEGER = 3;
+		const int STRING = 4;
+		const int BOOLEAN_ARR = 5;
+		const int FLOAT_ARR = 6;
+		const int INTEGER_ARR = 7;
+		const int STRING_ARR = 8;
+
 
 		/**
 		 * Name of set value.
@@ -34,10 +39,14 @@
 		 * @var array
 		 */
 		protected static array $lookup = [
-			'bln' => self::BOOLEAN,
-			'flt' => self::FLOAT,
-			'int' => self::INTEGER,
-			'str' => self::STRING
+			'bln'   => self::BOOLEAN,
+			'flt'   => self::FLOAT,
+			'int'   => self::INTEGER,
+			'str'   => self::STRING,
+			'bln[]' => self::BOOLEAN_ARR,
+			'flt[]' => self::FLOAT_ARR,
+			'int[]' => self::INTEGER_ARR,
+			'str[]' => self::STRING_ARR
 		];
 
 
@@ -127,6 +136,15 @@
 			}
 
 			return false;
+		}
+
+		/**
+		 * Checks if the field type is an array type.
+		 *
+		 * @return bool
+		 */
+		public function isArrayType() : bool {
+			return $this->value > 4;
 		}
 
 		/**
