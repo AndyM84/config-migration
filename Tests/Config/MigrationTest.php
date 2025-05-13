@@ -94,10 +94,11 @@
 		}
 
 		public function test_Migrator() {
-			$firstMigration = 'coreVersion[int] + 1';
+			$firstMigration  = 'coreVersion[int] + 1';
 			$secondMigration = "testField[str] + Test Value!\ntempField[int] + 1";
-			$thirdMigration = "anotherField[bln] + false";
+			$thirdMigration  = "anotherField[bln] + false";
 			$fourthMigration = "testField > testingField\ncoreVersion = 2\ntempField -\narrField[int[]] + 5\narrField[int[]] + 6\nnested.field[int] + 1\nnested.nested.field[str] + yeah buddy";
+			$fifthMigration  = "testingField > testing.field";
 
 			try {
 				$migrator = new Migrator('doesntExist');
@@ -138,10 +139,14 @@
 			$migrator = new Migrator('doesntExist');
 			$migrator->migrate();
 
+			file_put_contents('doesntExist/3-4.cfg', $fifthMigration);
+			$migrator = new Migrator('doesntExist');
+			$migrator->migrate();
+
 			$cfg = new ConfigContainer(file_get_contents('siteSettings.json'));
-			self::assertEquals(3, $cfg->get('configVersion'));
+			self::assertEquals(4, $cfg->get('configVersion'));
 			self::assertEquals(2, $cfg->get('coreVersion'));
-			self::assertEquals('Test Value!', $cfg->get('testingField'));
+			self::assertEquals('Test Value!', $cfg->get('testing.field'));
 			self::assertCount(2, $cfg->get('arrField', []));
 			self::assertEquals(5, $cfg->get('arrField')[0]);
 			self::assertEquals(1, $cfg->get('nested.field'));
