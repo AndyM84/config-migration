@@ -58,9 +58,9 @@
 		/**
 		 * Instantiates a new ConfigContainer object.
 		 *
-		 * @param string $jsonString Optional JSON string to attempt pulling settings from.
+		 * @param null|string $jsonString Optional JSON string to attempt pulling settings from.
 		 */
-		public function __construct(string $jsonString = null) {
+		public function __construct(null|string $jsonString = null) {
 			$data = null;
 
 			if ($jsonString !== null) {
